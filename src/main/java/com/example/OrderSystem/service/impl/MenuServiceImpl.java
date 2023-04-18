@@ -40,23 +40,11 @@ public class MenuServiceImpl implements MenuService {
         }
         List<Menu> response = menuDao.saveAll(menuList);
         return new MenuResponse(response, "新增餐點成功");
-/*練習
-//        if (CollectionUtils.isEmpty(menuList)){
-//            return new MenuResponse("新增餐點錯誤");
-//        }
-//        for (Menu item : menuList){
-//            if (!StringUtils.hasText(item.getName())){
-//                return new MenuResponse("餐點名稱不能為空");
-//            }
-//            if (item.getPrice() <= 0 ){
-//                return new MenuResponse("餐點價格錯誤");
-//            }
-//
-//        }
-練習*/
+
     }
 
     @Override
+    //用for迴圈跑exist改寫order的內容 homework0418
     public MenuResponse order(Map<String, Integer> orderMap) {//beef:10 ,AAA:5 ,tea:6
         List<String> itemList = new ArrayList<>();
 
@@ -97,13 +85,61 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public GetMenuResponse getMenuByName(String name) {
-    if (!StringUtils.hasText(name)){
-        return new GetMenuResponse("餐點名稱為空");
-    }
+        if (!StringUtils.hasText(name)) {
+            return new GetMenuResponse("餐點名稱錯誤");
+        }
         Optional<Menu> op = menuDao.findById(name);
-    if (!op.isPresent()){
-        return new GetMenuResponse("資料庫內搜尋不到對應的菜單名稱");
+        if (!op.isPresent()) {
+            return new GetMenuResponse("資料庫內搜尋不到對應的菜單名稱");
+        }
+        return new GetMenuResponse(op.get(), "successful");
     }
-        return new GetMenuResponse(op.get(),"successful");
+
+    @Override
+    public MenuResponse getAllMenu() {
+        List<Menu> op = menuDao.findAll();
+        return new MenuResponse(op);
     }
+
+    @Override
+    public MenuResponse updateMenuPrice(List<Menu> menuList) {
+        //1.只能修改已存在的菜單價格(價格不得為負數)
+        //2.不存在的菜單不能新增
+        //3.返回修改後的菜單名稱和新價格
+        List<String> list = new ArrayList<>();
+        if (CollectionUtils.isEmpty(menuList)) { //去找資料的話 沒有就沒有 如果空的字串 或有問題的字串進去 資料庫就不會找到
+            return new MenuResponse("餐點錯誤");   //新增資料的話才需要去判斷  是不是空的 因為新增空的進去會有問題
+        }                                         //找資料的話就不需要 但因為要 foreach所以還是要檢查
+        for (Menu item : menuList) {
+            if (item.getPrice() < 0) {
+                return new MenuResponse("價格錯誤");
+            }
+//            if (!StringUtils.hasText(item.getName())) {
+//                return new MenuResponse("餐點名稱空白");
+//            }
+            //"beef"、"fish"、"AAAA"
+            list.add(item.getName()); /// maybe include some name which doesn't in the repository
+        }
+        List<Menu> result = menuDao.findAllById(list);
+        //補防呆 list裡面如空的 的防呆
+        if (result.size()==0){
+            return new MenuResponse("沒有符合的");
+        }
+        List<Menu> finalList = new ArrayList<>();
+
+        for (Menu menuResult : result) {
+            for (Menu menu : menuList) {
+                if (menu.getName().equals(menuResult.getName())) {
+//                    menu.setPrice(menuResult.getPrice());//104行帶進來的
+// ????              finalPrice = menu.getPrice();
+                    finalList.add(menu);//修改好的menu
+//        ??            finalList.add(menu.getName());
+//        ??            finalList.add(menu.getPrice());
+                }
+            }
+        }
+//        List<Menu> response = menuDao.saveAll(menuList);
+        return new MenuResponse(menuDao.saveAll(finalList) , "successful");
+    }
+
 }

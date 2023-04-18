@@ -9,7 +9,26 @@ public class MenuResponse {
     private List<Menu> menuList;
     private Map<String ,Integer> menuMap ;
     private int totalPrice;
+
+    private int finalPrice;
     private String message;
+
+    public int getFinalPrice() {
+        return finalPrice;
+    }
+
+    public void setFinalPrice(int finalPrice) {
+        this.finalPrice = finalPrice;
+    }
+
+    public MenuResponse(List<Menu> menuList, int finalPrice) {
+        this.menuList = menuList;
+        this.finalPrice = finalPrice;
+    }
+
+    public MenuResponse(List<Menu> menuList) {
+        this.menuList = menuList;
+    }
 
     public MenuResponse(Map<String, Integer> menuMap, int totalPrice, String message) {
         this.menuMap = menuMap;

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@SpringBootTest(classes = OrderSystemApplicationTests.class)
+@SpringBootTest(classes = OrderSystemApplication.class)
 class OrderSystemApplicationTests {
 
 	@Autowired
@@ -19,11 +19,17 @@ class OrderSystemApplicationTests {
 
 	@Test
 	public void addMenusTest() {
-		List<Menu> list = new ArrayList<>(Arrays.asList(new Menu("beef",120),new Menu("fish",100)));
+		List<Menu> list = new ArrayList<>(Arrays.asList(new Menu("beef",120),new Menu("fish",100),new Menu("tea",999)));
 		MenuResponse response = menuService.addMenus(list);
 		List<Menu> responseList =response.getMenuList();
 
 //		List<Menu> list = new ArrayList<>(Arrays.asList(new Menu("beef",)))
+	}
+	@Test
+	public void updateMenuPriceTest(){
+		List<Menu> list = new ArrayList<>(Arrays.asList(new Menu("beef",990),new Menu("fish",850)));
+		MenuResponse response = menuService.updateMenuPrice(list);
+
 	}
 
 }
