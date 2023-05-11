@@ -7,13 +7,17 @@ import com.example.OrderSystem.service.ifs.RegisterService;
 import com.example.OrderSystem.vo.RegisterRequest;
 import com.example.OrderSystem.vo.RegisterResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpSession;
-
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+@EnableScheduling
 @Service
 public class RegisterImpl implements RegisterService {
     @Autowired
@@ -89,5 +93,9 @@ public class RegisterImpl implements RegisterService {
             return new RegisterResponse(RtnCode.DATA_ERROR.getMessage());//登入失敗或未激活
         }
         return new RegisterResponse(RtnCode.SUCCESSFUL.getMessage(),result.getRegTime());
+    }
+    @Scheduled(cron = "0 * 17 * * *")
+    public void scheduleTest(){
+        System.out.println("now: " + LocalTime.now());
     }
 }
