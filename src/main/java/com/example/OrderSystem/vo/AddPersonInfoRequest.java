@@ -4,7 +4,7 @@ import com.example.OrderSystem.entity.PersonInfo;
 
 import java.util.List;
 
-public class PersonInfoRequest {
+public class AddPersonInfoRequest {
 
     private List<PersonInfo> personInfoList;
 
@@ -12,14 +12,54 @@ public class PersonInfoRequest {
 
     private String id;
 
+    private int age ;
+
+    private int age2 ;
+
+    private  String cityStr;
+
+    private PersonInfo personInfo;
+
 //======================================
 
-    public PersonInfoRequest() {
+    public AddPersonInfoRequest() {
     }
 
 
 //======================================
 
+
+    public String getCityStr() {
+        return cityStr;
+    }
+
+    public void setCityStr(String cityStr) {
+        this.cityStr = cityStr;
+    }
+
+    public int getAge2() {
+        return age2;
+    }
+
+    public void setAge2(int age2) {
+        this.age2 = age2;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public PersonInfo getPersonInfo() {
+        return personInfo;
+    }
+
+    public void setPersonInfo(PersonInfo personInfo) {
+        this.personInfo = personInfo;
+    }
 
     public String getId() {
         return id;

@@ -5,20 +5,23 @@ import com.example.OrderSystem.repository.MenuDao;
 import com.example.OrderSystem.service.ifs.MenuService;
 import com.example.OrderSystem.vo.GetMenuResponse;
 import com.example.OrderSystem.vo.MenuResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import java.util.*;
 import java.util.Map.Entry;
 
 
 @Service
 public class MenuServiceImpl implements MenuService {
+    private Logger logger = LoggerFactory.getLogger(getClass()); //slf4j
     @Autowired
     private MenuDao menuDao;
-
 
     @Override
     public MenuResponse addMenus(List<Menu> menuList) {
@@ -38,6 +41,7 @@ public class MenuServiceImpl implements MenuService {
                 return new MenuResponse("餐點價格錯誤");
             }
         }
+        logger.info("search by ....~@#%");
         List<Menu> response = menuDao.saveAll(menuList);
         return new MenuResponse(response, "新增餐點成功");
 
@@ -46,41 +50,39 @@ public class MenuServiceImpl implements MenuService {
     @Override
     //用for迴圈跑exist改寫order的內容 homework0418
     public MenuResponse order(Map<String, Integer> orderMap) {//beef:10 ,AAA:5 ,tea:6
-        List<String> itemList = new ArrayList<>();
+        //直接開一個新的map進去52foreach裡面接 key value
+//List<Menu> menuList = new ArrayList<>();
+List<String> stringList = new ArrayList<>();
+//ordermap 餐點名稱存成陣列 丟進去findallbyId
+        Map<String,Integer> finalMap = new HashMap<>();
+        int singleTotalPrice = 0;
+        int totalPrice = 0 ;
 
-        for (Entry<String, Integer> item : orderMap.entrySet()) {
-            if (item.getValue() < 0) {
-                return new MenuResponse("餐點數量錯誤");
+        for (Entry<String ,Integer> map : orderMap.entrySet()) {
+            if (menuDao.existsById(map.getKey()) ) {// orderMap帶進來的String 確認與資料庫比對正確
+                finalMap.put(map.getKey(), map.getValue());
+                stringList.add(map.getKey());
+              Optional<Menu> op  = menuDao.findById(map.getKey());
+              if(!op.isPresent()){
+                  continue;
+              }
+                finalMap.put(map.getKey(),map.getValue());
+              totalPrice += op.get().getPrice() * map.getValue();
             }
-            //對 進來的orderMap foreach 防呆 進來的餐點數量
-            itemList.add(item.getKey());
-            //然後加進list for the next findAllById
+
         }
-
-        //目前的itemList:["beef", "AAA" , "tea"]: AAA此品項不存在
-        List<Menu> result = menuDao.findAllById(itemList); //"AAA" + "beef"  只有一條符合 目前只有  一條資料
-        int totalPrice = 0;
-        Map<String, Integer> finalOrderMap = new HashMap<>();
-        //兩個foreach 互相比對  第一層foreach 是 經過餐點數量防呆處理後並且經過 資料庫findAllById篩選後的list
-        //第二個層為 62行帶進來的 map 其存放為 <餐點名稱+餐點數量>
-
-        for (Menu menu : result) {
-            String item = menu.getName();//餐點名稱(有兩筆); 第一筆 beef 第二筆 tea
-            int price = menu.getPrice();
-            for (Entry<String, Integer> map : orderMap.entrySet()) {
-                String key = map.getKey(); //orderMap 中的餐點名稱 63行
-                int value = map.getValue();// orderMap 中的餐點數量 63行
-
-                //兩個foreach 互相比對 一樣的就是資料正確的
-                if (item.equals(key)) {
-                    int singleTotalPrice = price * value;// 價格*數量
-                    totalPrice += singleTotalPrice;
-                    finalOrderMap.put(key, value);
-                }
-            }
+        if (finalMap.size() == 0) {
+            return new MenuResponse("查無此菜單");
         }
-        totalPrice = totalPrice > 500 ? (int) (totalPrice * 0.9) : totalPrice;
-        return new MenuResponse(finalOrderMap, totalPrice, "點餐成功");
+        List<Menu> result = menuDao.findAllById(stringList);
+
+//        for (Menu menu :result){//price
+//               for (Entry<String ,Integer> ordermap : orderMap.entrySet()) {//orderMap.getValue 是分數 缺一個價格
+//                    singleTotalPrice = ordermap.getValue() * menu.getPrice();
+//                   totalPrice += singleTotalPrice;
+//               }
+//        }
+        return new MenuResponse(finalMap,totalPrice,"successful");
     }
 
     @Override
@@ -139,7 +141,7 @@ public class MenuServiceImpl implements MenuService {
             }
         }
 //        List<Menu> response = menuDao.saveAll(menuList);
-        return new MenuResponse(menuDao.saveAll(finalList) , "successful");
+        return new MenuResponse(menuDao.saveAll(finalList),"successful");
     }
 
 }
